@@ -1,0 +1,404 @@
+\documentclass[11pt]{article}
+ 
+% ----- encoding & font ----------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathpazo}              % Palatino
+\usepackage[scaled=0.82]{helvet}   % sans, used for placeholders
+\renewcommand{\ttdefault}{lmtt}    % Latin Modern mono for dates and labels
+\usepackage{microtype}
+ 
+% ----- layout --------------------------
+\usepackage[
+  letterpaper,
+  top=0.7in, bottom=0.7in, left=0.95in, right=0.95in
+]{geometry}
+\usepackage{graphicx}
+\graphicspath{{static/}}          % \photo{x.jpg} means static/x.jpg
+\usepackage{xcolor}
+\usepackage{multicol}
+\usepackage{needspace}
+\usepackage[hidelinks]{hyperref}
+ 
+% =============================================================
+%  CONFIG
+% =============================================================
+\definecolor{ink}      {HTML}{1C2024}
+\definecolor{inksoft}  {HTML}{4A545E}
+\definecolor{inkfaint} {HTML}{7B8794}
+\definecolor{accent}   {HTML}{2D6E7E}
+\definecolor{rule}     {HTML}{DFE3E7}
+\definecolor{todoink}  {HTML}{8A6A14}
+ 
+\color{ink}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\linespread{1.04}
+ 
+\hypersetup{
+  colorlinks=true,
+  urlcolor=accent,
+  linkcolor=accent,
+  pdftitle={Soumyadeep Mandal},
+  pdfauthor={Soumyadeep Mandal}
+}
+ 
+% =============================================================
+%  MACROS
+% =============================================================
+ 
+% - website-only commands; the PDF ignores them ------------
+\newcommand{\webpage}[2]{}   % \webpage{file name}{menu label}
+
+% \photo{photo.png} -- the file lives in static/ and is used by both the
+% website and the PDF. Change \photosize to resize it in the PDF only.
+\newlength{\photosize}\setlength{\photosize}{29mm}
+\newcommand{\photo}[1]{%
+  \IfFileExists{static/#1}{\includegraphics[width=\photosize]{static/#1}}{%
+    \IfFileExists{#1}{\includegraphics[width=\photosize]{#1}}{%
+      \GenericWarning{}{PHOTO NOT FOUND: looked for static/#1 and #1}%
+      \fcolorbox{todoink}{white}{%
+        \parbox[c][\dimexpr\photosize-2\fboxsep-2\fboxrule][c]{%
+                   \dimexpr\photosize-2\fboxsep-2\fboxrule}{%
+          \centering\footnotesize\textcolor{todoink}{%
+            photo not found\\[2pt]\texttt{\small static/#1}}}}%
+    }%
+  }%
+}
+ 
+% - placeholder; delete the wrapper once filled in ----------
+\newcommand{\todo}[1]{\textcolor{todoink}{\textsf{[#1]}}}
+ 
+% - header pieces ---------------------------
+\newcommand{\eyebrow}[1]{%
+  {\ttfamily\scriptsize\textcolor{inkfaint}{\MakeUppercase{#1}}}\par
+  \vspace{0.15em}%
+}
+\newcommand{\name}[1]{%
+  \vspace{0.1em}%
+  {\fontsize{27}{30}\selectfont\bfseries #1}\par
+  \vspace{0.45em}%
+}
+\newcommand{\position}[1]{%
+  {\large\textcolor{inksoft}{#1}}\par
+  \vspace{0.9em}%
+}
+\newcommand{\links}[1]{%
+  \vspace{0.6em}%
+  {\ttfamily\footnotesize #1}\par
+  \vspace{0.55em}%
+  {\color{accent}\hrule height 1.6pt}%
+}
+\newcommand{\linksep}{\quad}
+ 
+% - horizontal rule used between sections ---------------
+\newcommand{\sectionrule}{%
+  \vspace{0.9em}%
+  {\color{rule}\hrule height 0.4pt}%
+  \vspace{1.0em}%
+}
+ 
+% - section opener: rule + label + optional display heading ------
+% \sectionhead{label}{display heading, or leave empty: {}}
+\newcommand{\sectionhead}[2]{%
+  \needspace{4\baselineskip}%
+  \vspace{1.25em}%
+  \noindent
+  {\color{accent}\rule[-0.22em]{3.2pt}{1.05em}}\hspace{0.55em}%
+  {\fontsize{13}{15}\selectfont\bfseries\scshape\color{accent}#1}%
+  \par\vspace{0.38em}
+  {\color{accent}\hrule height 0.8pt}%
+  \vspace{0.95em}%
+  \ifx\relax#2\relax\else
+    {\fontsize{11}{13}\selectfont\bfseries #2}\par
+    \vspace{0.55em}%
+  \fi
+}
+ 
+% - dated entry (education, awards, positions) ------------
+% \entry{title}{date}{details; may be empty}
+\newcommand{\entry}[3]{%
+  \needspace{3\baselineskip}%
+  \begingroup
+  \setlength{\parskip}{0pt}%
+  \noindent
+  \begin{minipage}[t]{0.78\linewidth}
+    \textbf{#1}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{0.20\linewidth}
+    \raggedleft{\ttfamily\scriptsize\textcolor{inkfaint}{#2}}
+  \end{minipage}
+  \par\vspace{0.12em}
+  {\small\textcolor{inksoft}{#3}}\par
+  \endgroup
+  \vspace{0.75em}
+}
+ 
+% - publication entry -------------------------
+% \pub{number}{title}{authors / venue}
+\newcommand{\pub}[3]{%
+  \needspace{3\baselineskip}%
+  \begingroup
+  \setlength{\parskip}{0pt}%
+  \noindent
+  \begin{minipage}[t]{0.035\linewidth}
+    {\ttfamily\scriptsize\textcolor{inkfaint}{#1}}
+  \end{minipage}%
+  \hspace{0.015\linewidth}%
+  \begin{minipage}[t]{0.95\linewidth}
+    \textbf{#2}\par
+    \vspace{0.14em}
+    {\small\textcolor{inksoft}{#3}}
+  \end{minipage}
+  \par
+  \endgroup
+  \vspace{0.7em}
+}
+ 
+% - status tags: PREPRINT, UNDER REVIEW, IN PREPARATION --------
+\newcommand{\pubtag}[1]{%
+  \,\raisebox{0.12ex}{\fcolorbox{rule}{white}{%
+    \ttfamily\fontsize{5.6}{6}\selectfont
+    \textcolor{inkfaint}{\MakeUppercase{#1}}}}%
+}
+\newcommand{\tagline}[1]{%
+  \,\raisebox{0.12ex}{\fcolorbox{accent!40}{white}{%
+    \ttfamily\fontsize{5.6}{6}\selectfont
+    \textcolor{accent}{\MakeUppercase{#1}}}}%
+}
+ 
+% - callout with a full-height accent rule down the left side -----
+\newsavebox{\calloutbox}
+\newcommand{\callout}[1]{%
+  \vspace{0.5em}%
+  \begingroup\setlength{\parskip}{0pt}%
+  \begin{lrbox}{\calloutbox}%
+    \begin{minipage}{0.945\linewidth}#1\end{minipage}%
+  \end{lrbox}%
+  \noindent
+  {\color{accent}\rule{1.2pt}{\dimexpr\ht\calloutbox+\dp\calloutbox}}%
+  \hspace{0.7em}\raisebox{\dp\calloutbox}{\usebox{\calloutbox}}%
+  \par\endgroup
+}
+ 
+% - sub-heading inside a section -------------------
+\newcommand{\pubgroup}[1]{%
+  \needspace{5\baselineskip}%
+  \vspace{0.3em}
+  {\ttfamily\scriptsize\textcolor{inkfaint}{\MakeUppercase{#1}}}\par
+  \vspace{0.25em}
+  {\color{rule}\hrule height 0.4pt}
+  \vspace{0.8em}
+}
+ 
+% - skills block ---------------------------
+% Each group is one full-width row: heading, then the items running
+% horizontally and wrapping as needed, separated by a dot.
+\newif\ifskillfirst
+\newcommand{\skillsep}{\ \textcolor{inkfaint}{$\cdot$}\ }
+\newenvironment{skillgroup}[1]{%
+  \needspace{3\baselineskip}%
+  \par\noindent
+  \begingroup
+  \setlength{\parskip}{0pt}%
+  {\color{accent}\rule[0.06em]{0.42em}{0.42em}}\hspace{0.45em}%
+  \textbf{\small #1}\par
+  \vspace{0.2em}
+  \small
+  \skillfirsttrue
+}{%
+  \par\endgroup
+  \vspace{0.75em}
+}
+\newcommand{\skill}[1]{%
+  \ifskillfirst\skillfirstfalse\else\skillsep\fi
+  #1%
+}
+ 
+% - footer ------------------------------
+\newcommand{\footer}[1]{%
+  \sectionrule
+  {\ttfamily\scriptsize\textcolor{inkfaint}{#1}}%
+}
+ 
+% - journal name; own name bolded in author lists -----------
+\newcommand{\venue}[1]{\textit{#1}}
+\newcommand{\me}{\textbf{\textcolor{ink}{Mandal S.}}}
+ 
+\pagestyle{empty}
+
+% =============================================================
+\begin{document}
+% =============================================================
+
+% ----- HEADER (top of every web page) --------------
+
+\begin{minipage}[t]{0.70\linewidth}
+%\eyebrow{IIT Bombay}
+
+\name{Soumyadeep \textcolor{accent}{Mandal}}
+
+\position{PhD Scholar, Department of Biosciences and\\
+Bioengineering, Indian Institute of Technology Bombay}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.27\linewidth}
+\vspace{1.5mm}
+\photo{photo.jpg}
+\end{minipage}
+
+% NOTE: the final } closes \links{ . Keep it on the last ACTIVE line --
+% if you comment out the last line, move the } up with it.
+\links{%
+  \href{mailto:soumyadeep.mandal@iitb.ac.in}{soumyadeep.mandal@iitb.ac.in}
+  \linksep \href{mailto:soumyadeepmandal020@gmail.com}{soumyadeepmandal020@gmail.com}
+  %\linksep +91 81013 55751
+  \linksep \href{https://scholar.google.com/citations?user=tazJJNwAAAAJ\&hl=en}{Google Scholar}%
+}
+% \linksep \todo{ORCID}
+% \linksep \todo{LinkedIn}
+
+% =====================================================================
+\webpage{index}{Research}
+% =====================================================================
+
+I study how giant viruses repair their own DNA. Working with Prof.\ Kiran
+Kondabagil, I have characterised the \textit{Mre11} homologs encoded by
+\textit{Acanthamoeba polyphaga} mimivirus and Marseillevirus through their
+biochemical and biophysical properties and their role in the viral life cycle.
+
+My thesis work establishes that the mimivirus and Marseillevirus
+\textit{Mre11} homologs are functional nucleases, defines their substrate
+preferences and behaviour \textit{in vitro}, and connects that biochemistry
+to viral genomic maintenance.
+
+Apart from my thesis, I have collaborated on multiple projects resulting in publications and experiences in phage biology, microbiology, biosensors and human DNA repair systems. 
+
+% -- Availability. Remove the leading "% " from these lines to use it.
+% \callout{%
+%   \textbf{Seeking a postdoctoral position} from \todo{month/year
+%   available}. Thesis submission expected \todo{month/year}.}
+
+% =====================================================================
+\webpage{publications}{Publications}
+% =====================================================================
+
+\sectionhead{Publications}{}
+
+\pubgroup{Journal articles \& preprints}
+
+\pub{1}{Strand displacement activity of mimiviral polymerase X enables rapid
+  detection of sequence-specific DNA targets\pubtag{Preprint}}{%
+  Raman A.S., Lad S.B., \me, Paul D., Kondabagil K. $\cdot$
+  \venue{bioRxiv} (2026) $\cdot$
+  \href{https://doi.org/10.64898/2026.06.10.731134}{doi:10.64898/2026.06.10.731134}}
+
+\pub{2}{Engineering phage lysin for improved bactericidal activity and
+  cellular uptake to target intracellular pathogens\pubtag{Under review}}{%
+  Khan R., \me, Yadav P., Kondabagil K.}
+
+\pub{3}{The evolutionary landscape of modern-day replicases and
+  archaeo-eukaryotic primases may have giant viral interventions}{%
+  Lad S.B., \me, Kondabagil K. $\cdot$ \venue{Virology} 607, 110524 (2025)
+  $\cdot$
+  \href{https://doi.org/10.1016/j.virol.2025.110524}{doi:10.1016/j.virol.2025.110524}}
+
+\pub{4}{Synthesis of N\textsuperscript{6}-dA damaged DNAs to probe the
+  replication ability of human translesion polymerases}{%
+  Bagale S.S., Deshmukh P.U., \me, Malvi H., Kondabagil K.,
+  Pradeepkumar P.I. $\cdot$ \venue{The Journal of Organic Chemistry}
+  90(2), 1159--1166 (2025) $\cdot$
+  \href{https://doi.org/10.1021/acs.joc.4c01683}{doi:10.1021/acs.joc.4c01683}}
+
+\pub{5}{Synthesis of N\textsuperscript{2}-\textit{trans}-isosafrole-dG-adduct
+  bearing DNAs and the bypass studies with human TLS polymerases
+  pol $\eta$ and pol $\kappa$}{%
+  Bagale S.S., Deshmukh P.U., Lad S.B., Sudarsan A., Sudhakar S., \me,
+  Kondabagil K., Pradeepkumar P.I. $\cdot$
+  \venue{The Journal of Organic Chemistry} 89(11) (2024) $\cdot$
+  \href{https://doi.org/10.1021/acs.joc.4c00368}{doi:10.1021/acs.joc.4c00368}}
+
+\pub{6}{Human translesion synthesis polymerases pol $\eta$ and pol $\kappa$
+  perform error-free replication across N\textsuperscript{2}-dG
+  methyleugenol and estragole DNA adducts}{%
+  Deshmukh P.U., Lad S.B., Sudarsan A., Sudhakar S., Aggarwal T., \me,
+  Bagale S.S., Kondabagil K., Pradeepkumar P.I. $\cdot$
+  \venue{Biochemistry} 62(16), 2391--2406 (2023) $\cdot$
+  \href{https://doi.org/10.1021/acs.biochem.2c00663}{doi:10.1021/acs.biochem.2c00663}}
+
+\pubgroup{Conference abstracts}
+
+\pub{7}{Insights into the role of giant virus-coded Mre11 homologs in the
+  viral DNA damage repair}{%
+  \me, Yadav P., Mitra D., Kondabagil K. $\cdot$ \venue{FEBS Open Bio}
+  16, S379 (2026)\\
+  Poster, GRC Nucleic Acids 2025, Lucca (Barga), Italy, 21--27 June 2025 $\cdot$
+  \textit{DBT (Govt.\ of India) Travel Grant}}
+
+\pub{8}{Biochemical characterization of putative Mre11 homologs from
+  Mimivirus and Marseillevirus}{%
+  \me, Yadav P., Mitra D., Kondabagil K. $\cdot$
+  \venue{Journal of Biological Chemistry} 300(3), Abstract 1110 (2024)\\
+  Poster, ASBMB DiscoverBMB 2024, San Antonio, Texas, USA, 23--26 March 2024 $\cdot$
+  \textit{ASBMB Travel Award}}
+
+\sectionhead{Patent}{}
+
+\pub{1}{Modular Far-UVC Disinfection Tunnel}{%
+  Kunwar A., Kondabagil K., Sen S., Monika, Roy T., \me,
+  Saranathan N., Rajarshi S.V. $\cdot$ IN Patent 547282}
+
+% =====================================================================
+\webpage{techniques}{Techniques}
+% =====================================================================
+\sectionhead{Techniques and skills}{}
+
+\begin{skillgroup}{Giant virus systems}
+  \skill{Mimivirus and Marseillevirus handling}
+  \skill{Recombinant and knockout viruses by
+         homologous recombination}
+  \skill{\textit{Acanthamoeba castellanii} host culture}
+  \skill{Baculovirus and human coronavirus 229E}
+  \skill{Viral titre determination}
+  \skill{BSL-2 facility practice}
+\end{skillgroup}
+
+\begin{skillgroup}{Molecular biology \& protein expression}
+  \skill{Cloning: site-directed, traditional, scarless}
+  \skill{Expression in prokaryotic and baculovirus systems}
+  \skill{FPLC purification (ÄKTA)}
+\end{skillgroup}
+
+\begin{skillgroup}{Enzymology \& biophysics}
+  \skill{\textit{In vitro} biochemical and biophysical
+         characterisation of enzymes}
+  \skill{EMSA and fluorescence anisotropy}
+  \skill{FRET between labelled oligonucleotides}
+  \skill{Differential scanning fluorimetry (DSF) for
+         protein thermal shift assays (TSA)}
+  \skill{PAGE, denaturing PAGE, Western blotting}
+\end{skillgroup}
+
+\begin{skillgroup}{Cell culture \& assays}
+  \skill{Insect (Sf9) and mammalian (MRC5, A549,
+         HeLa, HEK293) cell culture}
+  \skill{Cell viability assays (MTT)}
+  \skill{Gentamicin protection assay for
+         intracellular bacterial killing}
+\end{skillgroup}
+
+\begin{skillgroup}{Imaging}
+  \skill{Confocal and fluorescence microscopy}
+  \skill{TEM sample preparation
+         (uranyl acetate staining)}
+  \skill{AFM, dry and liquid, for DNA and
+         DNA--protein interactions}
+\end{skillgroup}
+
+\begin{skillgroup}{Computation}
+  \skill{Evolutionary coupling (EV coupling) analysis}
+  \skill{Phylogenetic and evolutionary analyses}
+\end{skillgroup}
+
+\end{document}
